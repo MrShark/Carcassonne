@@ -11,10 +11,13 @@ logger = logging.getLogger()
 @click.command()
 @click.version_option(version=__version__)
 @click.option("--output-dir", default="tiles", help="Directory to write tiles in.")
+@click.option(
+    "--feature", default="", help="Only draw tiles with this feature. (default all)"
+)
 @click.option("--list", is_flag=True, default=False, help="List alls sets (and quit).")
 @click.option("-v", "--verbose", count=True, help="Increase verbosity")
 @click.argument("sets", nargs=-1)
-def generate_sets(output_dir, sets, list, verbose):
+def generate_sets(output_dir, feature, sets, list, verbose):
     """Generate carcassonne tiles in SETS."""
 
     if verbose == 1:
@@ -32,24 +35,17 @@ def generate_sets(output_dir, sets, list, verbose):
     for cardset in sets:
         for n, card in card_sets[cardset].items():
             for i in range(card[0]):
-                Card(f"{cardset}{n:02}", output_dir=output_dir, **card[1]).draw(i + 1)
+                if not feature or feature in card[1].keys():
+                    Card(f"{cardset}{n:02}", output_dir=output_dir, **card[1]).draw(
+                        i + 1
+                    )
 
 
 @click.command()
 @click.version_option(version=__version__)
 def helper():
-    keys = set()
+    ways = set()
     for s in card_sets.values():
         for c in s.values():
-            for i in c[1].keys():
-                if c[1][i] == True:
-                    keys.add(i)
-
-    for i in sorted(keys):
-        # print(f"cp src/gfx/base.svg src/gfx/River-{i}.svg")
-        print(
-            f"""
-if self.{i}:
-    logging.debug(f"Adding {i.capitalize()} to {{self.name}}")
-    self.features.append(get_gfx("{i.capitalize()}.svg"))"""
-        )
+            for w in c[1].get("river", "").split():
+                print(f'        direction["{w}"] = ("╺", 0)')
