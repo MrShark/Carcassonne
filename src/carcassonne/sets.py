@@ -57,7 +57,7 @@ card_sets["CAR"][23] = (4, {"roads": "ESW"})
 card_sets["CAR"][24] = (1, {"roads": "ENSW"})
 
 # Inns & Cathedrals
-# Carcassonne Complete Annotated Rules v7.4 p X.
+# Carcassonne Complete Annotated Rules v7.4 p 33.
 set_names["IAC"] = "Inns & Cathedrals"
 card_sets["IAC"] = {}
 card_sets["IAC"][1] = (1, {"monastery": True, "roads": "EW"})
@@ -225,7 +225,7 @@ card_sets["ABM"][12] = (1, {"roads": "ENSW", "monastery": True})
 card_sets["ABM"][13] = (6, {"city": "ENSW", "abbey": True})
 
 # King and Robber Baron
-# Carcassonne Complete Annotated Rules v7.4 p X.
+# Carcassonne Complete Annotated Rules v7.4 p 71.
 set_names["KRB"] = "King and Robber Baron"
 card_sets["KRB"] = {}
 card_sets["KRB"][1] = (1, {"city": "NW NS"})
