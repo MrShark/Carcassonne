@@ -1,34 +1,47 @@
+"""This module provides utilities for handling graphics and XML elements for the Carcassonne game.
+
+It includes functions to:
+- Retrieve graphics from a specified file in the GFX directory.
+- Extract specific XML elements from an ElementTree.
+
+Attributes:
+    __version__ (str): The version of the module.
+    GFX_DIR (str): The directory where graphics files are stored.
+    logger (logging.Logger): The logger for this module.
+"""
+
+# ruff: noqa: N806
+
 import logging
 import random
 import xml.etree.ElementTree as ET
-from os import path
-from typing import Iterable
+from collections.abc import Iterable
+from pathlib import Path
+from typing import ClassVar
 
 __version__ = "0.1.0"
-GFX_DIR = path.join(path.dirname(__file__), "..", "gfx")
+GFX_DIR = Path(__file__).resolve().parent / ".." / "gfx"
 logger = logging.getLogger()
 
 
-def get_gfx(filename):
-    """Open `filename` in GFX_DIR and return the ELementTree element with the id gfx"""
+def get_gfx(filename: str) -> ET.Element:
+    """Open `filename` in GFX_DIR and return the ELementTree element with the id gfx."""
     logging.debug(f"Reading graphics from {filename}")
-    tree = ET.parse(path.join(GFX_DIR, filename))
+    tree = ET.parse(GFX_DIR / filename)  # noqa: S314
     return tree.find(".//*[@id='gfx']")
 
 
 def get_element(tree: ET.ElementTree, element: str) -> ET.Element:
-    """Type protected ET.ElementTree.find()"""
-
+    """Type protected ET.ElementTree.find()."""
     rv = tree.find(f".//*[@id='{element}']")
     if rv is not None:
         return rv
-    else:
-        raise TypeError
+    raise TypeError
 
 
-def write_tile(filename: str, gfx: Iterable):
+def write_tile(filename: str, gfx: Iterable) -> None:
     """Create a tile with the graphics in gfx added."""
-    tree = ET.parse(path.join(GFX_DIR, "tile.svg"))
+    tree = ET.parse(GFX_DIR / "tile.svg")  # noqa: S314
     tile = get_element(tree, "tile")
     for g in gfx:
         if g:
@@ -37,32 +50,40 @@ def write_tile(filename: str, gfx: Iterable):
 
 
 class Card:
-    """A Carcassonne card"""
+    """A Carcassonne card."""
 
-    direction = {}
-    direction["E"] = ("╺", 0)
-    direction["EN"] = ("┗", 0)
-    direction["ENS"] = ("┳", 3)
-    direction["ENsw"] = ("╄", 0)
-    direction["ENSW"] = ("╋", 0)
-    direction["ENW"] = ("┳", 2)
-    direction["ES"] = ("┗", 1)
-    direction["ESW"] = ("┳", 0)
-    direction["EW"] = ("┃", 1)
-    direction["Ew"] = ("╼", 0)
-    direction["N"] = ("╺", 3)
-    direction["Nes"] = ("┞", 0)
-    direction["Nesw"] = ("╀", 0)
-    direction["NS"] = ("┃", 0)
-    direction["Nsw"] = ("┦", 0)
-    direction["NSW"] = ("┳", 1)
-    direction["NW"] = ("┗", 3)
-    direction["NWes"] = ("╃", 0)
-    direction["S"] = ("╺", 1)
-    direction["SW"] = ("┗", 2)
-    direction["W"] = ("╺", 2)
+    direction: ClassVar[dict] = {
+        "E": ("╺", 0),
+        "EN": ("┗", 0),
+        "ENS": ("┳", 3),
+        "ENsw": ("╄", 0),
+        "ENSW": ("╋", 0),
+        "ENW": ("┳", 2),
+        "ES": ("┗", 1),
+        "ESW": ("┳", 0),
+        "EW": ("┃", 1),
+        "Ew": ("╼", 0),
+        "N": ("╺", 3),
+        "Nes": ("┞", 0),
+        "Nesw": ("╀", 0),
+        "NS": ("┃", 0),
+        "Nsw": ("┦", 0),
+        "NSW": ("┳", 1),
+        "NW": ("┗", 3),
+        "NWes": ("╃", 0),
+        "S": ("╺", 1),
+        "SW": ("┗", 2),
+        "W": ("╺", 2),
+    }
 
-    def __init__(self, name, output_dir="tiles", **args) -> None:
+    def __init__(self, name: str, output_dir: str = "tiles", **args: dict[str, any]) -> None:
+        """Initialize a new Carcassonne card.
+
+        Args:
+            name (str): The name of the card.
+            output_dir (str): The directory where the card's SVG file will be saved.
+            **args (dict): Additional attributes for the card.
+        """
         self.roads = ""
         self.city = ""
         self.river = ""
@@ -93,15 +114,14 @@ class Card:
                 self.__dict__[attr] = value
                 self.seed += str(attr) + str(value)
             else:
-                raise AttributeError(
-                    f"{self.__class__.__name__} have no attribute {attr}"
-                )
-        # print(self.roads)
+                msg = f"{self.__class__.__name__} have no attribute {attr}"
+                raise AttributeError(msg)
 
-        self.tile = ET.parse(path.join(GFX_DIR, "tile.svg"))
+        self.tile = ET.parse(GFX_DIR / "tile.svg")  # noqa: S314
         self.features = get_element(self.tile, "tile")
 
-    def draw_roads(self, direction):
+    def draw_roads(self, direction: str) -> None:
+        """Draw the roads on the card."""
         logging.debug(f"Adding {direction} Road to {self.name}")
         W1 = (0, 22.5)
         W2 = (0, 27.5)
@@ -162,11 +182,18 @@ class Card:
                     """
 
         else:
-            logging.error(
-                f"Strange glyph {glyph} when adding {direction} road to {self.name}"
-            )
+            logging.error(f"Strange glyph {glyph} when adding {direction} road to {self.name}")
+        road = ET.Element(
+            "{http://www.w3.org/2000/svg}path",
+            style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1",
+            d=path,
+            id=f"road{direction}",
+            transform=f"rotate({rotation*90} 25 25)",
+        )
+        self.features.append(road)
 
-    def draw_river(self, direction):
+    def draw_river(self, direction: str) -> None:
+        """Draw the river on the card."""
         logging.debug(f"Adding {direction} River to {self.name}")
         W1 = (0, 20)
         W2 = (0, 30)
@@ -214,9 +241,7 @@ class Card:
                     C {a[0]+5} {a[1]+10} {a[0]+5} {a[1]+10} {E2[0]} {E2[1]}
                     """
         else:
-            logging.error(
-                f"Strange glyph {glyph} when adding {direction} river to {self.name}"
-            )
+            logging.error(f"Strange glyph {glyph} when adding {direction} river to {self.name}")
 
         road = ET.Element(
             "{http://www.w3.org/2000/svg}path",
@@ -227,86 +252,121 @@ class Card:
         )
         self.features.append(road)
 
-    def draw(self, count: int):
-        for n in range(1, count + 1):
-            if self.roads:
-                for dir in self.roads.split(" "):
-                    self.draw_roads(dir)
-            if self.city:
-                for dir in self.city.split(" "):
-                    logging.debug(f"Adding {dir} City to {self.name}")
-                    self.features.append(get_gfx(f"City-{dir}.svg"))
-            if self.river:
-                for dir in self.river.split(" "):
-                    self.draw_river(dir)
+    def draw_city(self, direction: str) -> None:
+        """Draw a city on the card."""
+        logging.debug(f"Adding {direction} City to {self.name}")
+        NW = (0, 0)
+        NE = (0, 50)
+        SE = (50, 50)
+        SW = (50, 0)
+        glyph, rotation = self.direction[direction]
+        if glyph == "╺":
+            path = f"""M {NE[0]} {NE[1]}
+                    Q 25 25  {SE[0]} {SE[1]}"""
+        elif glyph == "┗":
+            path = f"""M {NW[0]} {NW[1]}
+                    Q 25 25  {SE[0]} {SE[1]}"""
+        elif glyph == "┃":
+            path = f"""M {NW[0]} {NW[1]}
+                    Q 25 15  {SW[0]} {SW[1]}
+                    M {NE[0]} {NE[1]}
+                    Q 25 35  {SE[0]} {SE[1]}"""
+        elif glyph == "┳":
+            path = f"""M {NW[0]} {NW[1]}
+                    Q 10 25  {NE[0]} {NE[1]}"""
+        # missing glyphs "┞┦╀╃╄╋╼"
+        else:
+            logging.error(f"Strange glyph {glyph} when adding {direction} city to {self.name}")
+            path = ""
 
-            if self.abbey:
-                logging.debug(f"Adding Abbey to {self.name}")
-                self.features.append(get_gfx("Abbey.svg"))
+        road = ET.Element(
+            "{http://www.w3.org/2000/svg}path",
+            style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1",
+            d=path,
+            id=f"road{direction}",
+            transform=f"rotate({rotation*90} 25 25)",
+        )
+        self.features.append(road)
 
-            if self.cathedral:
-                logging.debug(f"Adding Cathedral to {self.name}")
-                self.features.append(get_gfx("Cathedral.svg"))
+    def draw(self) -> None:  # noqa: C901, PLR0912, PLR0915
+        """Draw all the features of the card."""
+        if self.roads:
+            for direction in self.roads.split(" "):
+                self.draw_roads(direction)
+        if self.city:
+            for direction in self.city.split(" "):
+                self.draw_city(direction)
+        if self.river:
+            for direction in self.river.split(" "):
+                self.draw_river(direction)
 
-            if self.cloth:
-                logging.debug(f"Adding Cloth to {self.name}")
-                self.features.append(get_gfx("Cloth.svg"))
+        if self.abbey:
+            logging.debug(f"Adding Abbey to {self.name}")
+            self.features.append(get_gfx("Abbey.svg"))
 
-            if self.dragon:
-                logging.debug(f"Adding Dragon to {self.name}")
-                self.features.append(get_gfx("Dragon.svg"))
+        if self.cathedral:
+            logging.debug(f"Adding Cathedral to {self.name}")
+            self.features.append(get_gfx("Cathedral.svg"))
 
-            if self.grain:
-                logging.debug(f"Adding Grain to {self.name}")
-                self.features.append(get_gfx("Grain.svg"))
+        if self.cloth:
+            logging.debug(f"Adding Cloth to {self.name}")
+            self.features.append(get_gfx("Cloth.svg"))
 
-            if self.inn:
-                logging.debug(f"Adding Inn to {self.name}")
-                self.features.append(get_gfx("Inn.svg"))
+        if self.dragon:
+            logging.debug(f"Adding Dragon to {self.name}")
+            self.features.append(get_gfx("Dragon.svg"))
 
-            if self.lake:
-                logging.debug(f"Adding Lake to {self.name}")
-                self.features.append(get_gfx("Lake.svg"))
+        if self.grain:
+            logging.debug(f"Adding Grain to {self.name}")
+            self.features.append(get_gfx("Grain.svg"))
 
-            if self.monastery:
-                logging.debug(f"Adding Monastery to {self.name}")
-                self.features.append(get_gfx("Monastery.svg"))
+        if self.inn:
+            logging.debug(f"Adding Inn to {self.name}")
+            self.features.append(get_gfx("Inn.svg"))
 
-            if self.pigs:
-                logging.debug(f"Adding Pigs to {self.name}")
-                self.features.append(get_gfx("Pigs.svg"))
+        if self.lake:
+            logging.debug(f"Adding Lake to {self.name}")
+            self.features.append(get_gfx("Lake.svg"))
 
-            if self.portal:
-                logging.debug(f"Adding Portal to {self.name}")
-                self.features.append(get_gfx("Portal.svg"))
+        if self.monastery:
+            logging.debug(f"Adding Monastery to {self.name}")
+            self.features.append(get_gfx("Monastery.svg"))
 
-            if self.princess:
-                logging.debug(f"Adding Princess to {self.name}")
-                self.features.append(get_gfx("Princess.svg"))
+        if self.pigs:
+            logging.debug(f"Adding Pigs to {self.name}")
+            self.features.append(get_gfx("Pigs.svg"))
 
-            if self.shield:
-                logging.debug(f"Adding Shield to {self.name}")
-                self.features.append(get_gfx("Shield.svg"))
+        if self.portal:
+            logging.debug(f"Adding Portal to {self.name}")
+            self.features.append(get_gfx("Portal.svg"))
 
-            if self.shrine:
-                logging.debug(f"Adding Shrine to {self.name}")
-                self.features.append(get_gfx("Shrine.svg"))
+        if self.princess:
+            logging.debug(f"Adding Princess to {self.name}")
+            self.features.append(get_gfx("Princess.svg"))
 
-            if self.spring:
-                logging.debug(f"Adding Spring to {self.name}")
-                self.features.append(get_gfx("Spring.svg"))
+        if self.shield:
+            logging.debug(f"Adding Shield to {self.name}")
+            self.features.append(get_gfx("Shield.svg"))
 
-            if self.tower:
-                logging.debug(f"Adding Tower to {self.name}")
-                self.features.append(get_gfx("Tower.svg"))
+        if self.shrine:
+            logging.debug(f"Adding Shrine to {self.name}")
+            self.features.append(get_gfx("Shrine.svg"))
 
-            if self.vulcano:
-                logging.debug(f"Adding Vulcano to {self.name}")
-                self.features.append(get_gfx("Vulcano.svg"))
+        if self.spring:
+            logging.debug(f"Adding Spring to {self.name}")
+            self.features.append(get_gfx("Spring.svg"))
 
-            if self.wine:
-                logging.debug(f"Adding Wine to {self.name}")
-                self.features.append(get_gfx("Wine.svg"))
+        if self.tower:
+            logging.debug(f"Adding Tower to {self.name}")
+            self.features.append(get_gfx("Tower.svg"))
 
-            logging.info(f"Writing to {self.output_dir}/{self.name}-{n:1}.svg")
-            self.tile.write(f"{self.output_dir}/{self.name}-{n:1}.svg")
+        if self.vulcano:
+            logging.debug(f"Adding Vulcano to {self.name}")
+            self.features.append(get_gfx("Vulcano.svg"))
+
+        if self.wine:
+            logging.debug(f"Adding Wine to {self.name}")
+            self.features.append(get_gfx("Wine.svg"))
+
+        logging.info(f"Writing to {self.output_dir}/{self.name}.svg")
+        self.tile.write(f"{self.output_dir}/{self.name}.svg")

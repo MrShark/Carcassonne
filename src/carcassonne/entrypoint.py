@@ -1,3 +1,5 @@
+"""Entrypoints for scripts."""
+
 import logging
 
 import click
@@ -11,23 +13,20 @@ logger = logging.getLogger()
 @click.command()
 @click.version_option(version=__version__)
 @click.option("--output-dir", default="tiles", help="Directory to write tiles in.")
-@click.option(
-    "--feature", default="", help="Only draw tiles with this feature. (default all)"
-)
-@click.option("--list", is_flag=True, default=False, help="List alls sets (and quit).")
+@click.option("--feature", default="", help="Only draw tiles with this feature. (default all)")
+@click.option("--list", "list_sets", is_flag=True, default=False, help="List alls sets (and quit).")
 @click.option("-v", "--verbose", count=True, help="Increase verbosity")
 @click.argument("sets", nargs=-1)
-def generate_sets(output_dir, feature, sets, list, verbose):
+def generate_sets(output_dir: str, feature: str, sets: str, *, list_sets: bool, verbose: int) -> None:
     """Generate carcassonne tiles in SETS."""
-
     if verbose == 1:
         logger.setLevel(logging.INFO)
-    if verbose >= 2:
+    if verbose >= 2:  # noqa: PLR2004
         logger.setLevel(logging.DEBUG)
 
-    if list:
+    if list_sets:
         for cardset in card_sets:
-            print(f"{cardset}: {set_names[cardset]}")
+            print(f"{cardset}: {set_names[cardset]}")  # noqa: T201
 
     if not sets:
         sets = card_sets.keys()
@@ -35,17 +34,15 @@ def generate_sets(output_dir, feature, sets, list, verbose):
     for cardset in sets:
         for n, card in card_sets[cardset].items():
             for i in range(card[0]):
-                if not feature or feature in card[1].keys():
-                    Card(f"{cardset}{n:02}", output_dir=output_dir, **card[1]).draw(
-                        i + 1
-                    )
+                if not feature or feature in card[1]:
+                    Card(f"{cardset}{n:02}-{i+1}", output_dir=output_dir, **card[1]).draw()
 
 
 @click.command()
 @click.version_option(version=__version__)
-def helper():
-    ways = set()
+def helper() -> None:
+    """Helper script during development."""
     for s in card_sets.values():
         for c in s.values():
             for w in c[1].get("river", "").split():
-                print(f'        direction["{w}"] = ("╺", 0)')
+                print(f'        direction["{w}"] = ("╺", 0)')  # noqa: T201

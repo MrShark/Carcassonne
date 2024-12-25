@@ -1,4 +1,4 @@
-"""Definition of the various card sets for Carcassonne
+"""Definition of the various card sets for Carcassonne.
 
 set_names is a dictionary from set label to human readable name
 >>> set_names["CAR"]
@@ -20,6 +20,7 @@ that dictionary is from integer to tupple with count and parameters for creating
 <carcassonne.Card object at 0x7f1c8d0e8cd0>
 
 """
+
 card_sets = {}
 set_names = {}
 
@@ -49,7 +50,7 @@ card_sets["CAR"][16] = (4, {"city": "N", "roads": "EW"})
 card_sets["CAR"][17] = (3, {"city": "N", "roads": "ES"})
 card_sets["CAR"][18] = (3, {"city": "N", "roads": "ESW"})
 card_sets["CAR"][19] = (4, {"monastery": True})
-card_sets["CAR"][20] = (2, {"monastery": True, "roads": "W"})
+card_sets["CAR"][20] = (2, {"monastery": True, "roads": "S"})
 
 card_sets["CAR"][21] = (9, {"roads": "SW"})
 card_sets["CAR"][22] = (8, {"roads": "SW"})

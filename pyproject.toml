@@ -11,12 +11,9 @@ python = "^3.11"
 click = "^8.1.6"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
-flake8 = "^6.0.0"
-isort = "^5.12.0"
-sphinx = "^7.0.1"
-nox = "^2023.4.22"
-myst-parser = "^2.0.0"
+sphinx = "*"
+nox = "*"
+myst-parser = "*"
 sphinx-click = "*"
 sphinxcontrib-applehelp = "*"
 sphinxcontrib-devhelp = "*"
@@ -24,8 +21,8 @@ sphinxcontrib-htmlhelp = "*"
 sphinxcontrib-jsmath = "*"
 sphinxcontrib-qthelp = "*"
 sphinxcontrib-serializinghtml = "*"
-sphinx-autodoc2 = {extras = ["cli"], version = "^0.5.0"}
-safety = "^2.3.5"
+sphinx-autodoc2 = { extras = ["cli"], version = "*" }
+ruff = "*"
 
 
 [build-system]
@@ -36,7 +33,29 @@ build-backend = "poetry.core.masonry.api"
 carcassonne_sets = "carcassonne.entrypoint:generate_sets"
 carcassonne_helper = "carcassonne.entrypoint:helper"
 
-[tool.pylint.logging]
-# The type of string formatting that logging methods do. `old` means using %
-# formatting, `new` is for `{}` formatting.
-logging-format-style = "fstr"
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "S311",   # This is not crypto code
+    "G004",   # Allow logging statement uses f-string
+    "W191",   # Not recomended with auto formating
+    "E111",   # Not recomended with auto formating
+    "E114",   # Not recomended with auto formating
+    "E117",   # Not recomended with auto formating
+    "D206",   # Not recomended with auto formating
+    "D300",   # Not recomended with auto formating
+    "Q000",   # Not recomended with auto formating
+    "Q001",   # Not recomended with auto formating
+    "Q002",   # Not recomended with auto formating
+    "Q003",   # Not recomended with auto formating
+    "COM812", # Not recomended with auto formating
+    "COM819", # Not recomended with auto formating
+    "ISC001", # Not recomended with auto formating
+    "ISC002", # Not recomended with auto formating
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
