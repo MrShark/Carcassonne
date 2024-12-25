@@ -49,6 +49,28 @@ def write_tile(filename: str, gfx: Iterable) -> None:
     tree.write(filename)
 
 
+def tile_cards(filename: str, cards: str, per_row: int) -> None:
+    """Tile the graphics in cards as one file."""
+    tree = ET.parse(GFX_DIR / "tile.svg")  # noqa: S314
+    tile = get_element(tree, "tile")
+    for n, card in enumerate(cards):
+        card_tree = ET.parse(card)  # noqa: S314
+        element = get_element(card_tree, "tile")
+        group = ET.Element(
+            "{http://www.w3.org/2000/svg}g",
+            transform=f"translate({(n%per_row)*60} {(n//per_row)*60})",
+        )
+        group.append(element)
+        tile.append(group)
+
+    width = per_row * 60
+    height = ((len(cards) // per_row) + 1) * 60
+    tree.getroot().attrib["width"] = f"{width}mm"
+    tree.getroot().attrib["height"] = f"{height}mm"
+    tree.getroot().attrib["viewBox"] = f"0 0 {width} {height}"
+    tree.write(filename)
+
+
 class Card:
     """A Carcassonne card."""
 

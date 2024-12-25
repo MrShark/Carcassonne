@@ -32,6 +32,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 carcassonne_sets = "carcassonne.entrypoint:generate_sets"
 carcassonne_helper = "carcassonne.entrypoint:helper"
+carcassonne_tiler = "carcassonne.entrypoint:tiler"
 
 [tool.ruff]
 line-length = 120

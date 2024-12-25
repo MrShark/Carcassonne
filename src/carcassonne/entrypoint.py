@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from . import Card, __version__
+from . import Card, __version__, tile_cards
 from .sets import card_sets, set_names
 
 logger = logging.getLogger()
@@ -36,6 +36,16 @@ def generate_sets(output_dir: str, feature: str, sets: str, *, list_sets: bool, 
             for i in range(card[0]):
                 if not feature or feature in card[1]:
                     Card(f"{cardset}{n:02}-{i+1}", output_dir=output_dir, **card[1]).draw()
+
+
+@click.command()
+@click.version_option(version=__version__)
+@click.option("--output", default="tiled.svg", help="Document to tile the tiles in.")
+@click.option("--width", default=5, type=int, help="Number of cards on each row.")
+@click.argument("tiles", nargs=-1)
+def tiler(output: str, width: int, tiles: list[str]) -> None:
+    """Tile the given tiles/bricks into one document."""
+    tile_cards(output, tiles, width)
 
 
 @click.command()
