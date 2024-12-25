@@ -1,13 +1,14 @@
-"""Sphinx configuration."""
-import os
+"""Sphinx configuration."""  # noqa: INP001
+
 import sys
 from datetime import datetime
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath("../src"))
+sys.path.insert(0, str(Path("../src").resolve()))
 
 project = "Carcassonne"
 author = "jens persson"
-__copyright__ = f"{datetime.now().year}, {author}"
+__copyright__ = f"2023-{datetime.now().year}, {author}"  # noqa: DTZ005
 
 
 extensions = [

@@ -23,6 +23,7 @@ sphinxcontrib-qthelp = "*"
 sphinxcontrib-serializinghtml = "*"
 sphinx-autodoc2 = { extras = ["cli"], version = "*" }
 ruff = "*"
+pre-commit = "*"
 
 
 [build-system]
